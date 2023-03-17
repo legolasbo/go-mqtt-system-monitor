@@ -1,0 +1,6 @@
+name: Kernel version
+id: kernel_version
+description: Current kernel version
+unit: ""
+class: None
+script: uname -r

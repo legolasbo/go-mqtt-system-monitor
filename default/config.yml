@@ -1,0 +1,41 @@
+### Update period
+#   how often the sensors data will be published on MQTT
+#   default: 10 (seconds)
+#update-period: 10
+
+### MQTT Broker
+#   The MQTT broker address
+mqtt-broker: 'localhost'
+### MQTT Broker port
+#   The MQTT broker port
+#   default: 1883
+#mqtt-broker-port: 1883
+#mqtt-user: ''
+#mqtt-password: ''
+
+### Sensors
+#   A list of enabled sensors
+#   default: []
+#   example: ['cpu_load']
+#sensors: []
+
+### Home Assistant
+#   if true the device will be discovered by an
+#   Home Assistant instance connected to the same MQTT broker
+#   default: false
+#homeassistant: false
+
+### Prefix
+#   the topic prefix
+#   default: mqtt-system-monitor
+#prefix: 'mqtt-system-monitor'
+
+### Client ID
+#   the identifier of this machine, defaults to hostname
+#   default: hostname
+#client-id: ''
+
+### Log verbosity
+#   0 -> Error 1 -> Warn 2 -> Info 3 -> Debug 4 or higher -> Trace
+#   default: 2
+#log-verbosity: 2
