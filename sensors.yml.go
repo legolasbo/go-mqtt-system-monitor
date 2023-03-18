@@ -42,6 +42,7 @@ func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig)
 		ExpireAfter: DefaultExpireAfter,
 		StateTopic:  fmt.Sprintf("%s/%s/%s/%s", config.Prefix, config.ClientId, s.Class, s.Id),
 		UniqueId:    uniqueId,
+		ObjectId:    uniqueId,
 	}
 }
 
