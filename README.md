@@ -5,7 +5,7 @@ GO-MSM a loose golang port of [MSM](https://github.com/cmargiotta/mqtt-system-mo
 ## Building from source
 
 ```console
-go build
+go build -o msm
 ```
 
 The executable will be placed in `build/src/msm`.
@@ -13,7 +13,8 @@ The executable will be placed in `build/src/msm`.
 To manually install msm, the systemd service, the default sensors and the default config.yml:
 
 ```console
-sudo cp msm.service /usr/lib/systemd/system/
+sudo cp msm /usr/bin/msm
+sudo cp systemd/msm.service /usr/lib/systemd/system/
 sudo cp -r default /etc/msm
 
 sudo systemctl enable msm
