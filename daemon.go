@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eclipse/paho.mqtt.golang"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -122,6 +123,11 @@ func (d *Daemon) filterSensors() {
 }
 
 func createDaemon(config Config, logger Logger) Daemon {
+	_, err := net.LookupIP(config.MQTTBroker)
+	if err != nil {
+		hostLookup(config.MQTTBroker)
+	}
+
 	d := Daemon{Config: config, Logger: logger}
 
 	d.sensors = LoadSensors(logger)

@@ -9,7 +9,7 @@ import (
 func getMQTTClient(config Config, logger Logger) (mqtt.Client, error) {
 
 	var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-		logger.Info("Connected")
+		logger.Info(fmt.Sprintf("Connected to %s:%d", config.MQTTBroker, config.MQTTBrokerPort))
 	}
 
 	var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
