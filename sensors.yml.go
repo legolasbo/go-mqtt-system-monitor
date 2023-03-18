@@ -35,7 +35,7 @@ func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig)
 		Class:             s.Class,
 		UnitOfMeasurement: s.Unit,
 		Device: HomeAssistantDevice{
-			Name:        s.Name,
+			Name:        fmt.Sprintf("%s %s", config.ClientId, s.Name),
 			Model:       config.ClientId,
 			Identifiers: config.ClientId,
 		},
