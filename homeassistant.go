@@ -10,6 +10,7 @@ type HomeAssistantConfig struct {
 	ExpireAfter       int                 `json:"expire_after,omitempty"`
 	StateTopic        string              `json:"state_topic,omitempty"`
 	UniqueId          string              `json:"unique_id,omitempty"`
+	ObjectId          string              `json:"object_id,omitempty"`
 }
 
 type HomeAssistantDevice struct {
