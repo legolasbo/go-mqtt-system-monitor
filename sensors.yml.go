@@ -118,7 +118,6 @@ func builtinSensors() map[string]Sensor {
 	sensors := make(map[string]Sensor)
 
 	sensors["cpu_cores"] = Sensor{
-		DeviceClass: "None",
 		Unit:        "",
 		Id:          "cpu_cores",
 		Name:        "CPU Cores",
@@ -126,7 +125,6 @@ func builtinSensors() map[string]Sensor {
 		Description: "Number of available cpu cores",
 	}
 	sensors["cpu_load"] = Sensor{
-		DeviceClass: "None",
 		Unit:        "%",
 		Id:          "cpu_load",
 		Name:        "CPU Load",
@@ -151,7 +149,6 @@ func builtinSensors() map[string]Sensor {
 		Description: "Total data sent over the network in GiB",
 	}
 	sensors["root_fs_usage"] = Sensor{
-		DeviceClass: "None",
 		Unit:        "%",
 		Id:          "root_fs_usage",
 		Name:        "Root FS usage",
@@ -184,7 +181,6 @@ func builtinSensors() map[string]Sensor {
 		Description: "Total memory in GB",
 	}
 	sensors["memory_usage"] = Sensor{
-		DeviceClass: "None",
 		Unit:        "%",
 		Id:          "memory_usage",
 		Name:        "Memory usage",
