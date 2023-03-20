@@ -17,7 +17,7 @@ const BytesInGigaByte = 1073741824
 
 type BuiltinSensor func() (string, error)
 type Sensor struct {
-	DeviceClass string `yaml:"class"`
+	DeviceClass string `yaml:"device_class"`
 	Description string `yaml:"description"`
 	Id          string `yaml:"id"`
 	Name        string `yaml:"name"`
