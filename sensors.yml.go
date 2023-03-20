@@ -25,7 +25,7 @@ type Sensor struct {
 	Builtin     BuiltinSensor
 	Value       string
 	Unit        string `yaml:"unit"`
-	StateCass   string `yaml:"state_cass"`
+	StateClass  string `yaml:"state_class"`
 }
 
 func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig) {
@@ -44,7 +44,7 @@ func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig)
 		StateTopic:  fmt.Sprintf("%s/%s/%s/%s", config.Prefix, config.ClientId, s.DeviceClass, s.Id),
 		UniqueId:    uniqueId,
 		ObjectId:    uniqueId,
-		StateClass:  s.StateCass,
+		StateClass:  s.StateClass,
 	}
 }
 
@@ -132,7 +132,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "CPU Load",
 		Builtin:     cpuPercentage,
 		Description: "CPU Load averaged over all CPU cores in percent",
-		StateCass:   "measurement",
+		StateClass:  "measurement",
 	}
 	sensors["net_rx_usage"] = Sensor{
 		DeviceClass: "data_size",
@@ -157,7 +157,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "Root FS usage",
 		Builtin:     rootFSUsage,
 		Description: "Root filesystem usage in percent",
-		StateCass:   "measurement",
+		StateClass:  "measurement",
 	}
 	sensors["available_memory"] = Sensor{
 		DeviceClass: "data_size",
@@ -190,7 +190,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "Memory usage",
 		Builtin:     memoryUsage,
 		Description: "Memory usage in percent",
-		StateCass:   "measurement",
+		StateClass:  "measurement",
 	}
 
 	return sensors
