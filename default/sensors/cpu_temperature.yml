@@ -1,0 +1,7 @@
+name: CPU Temperature
+id: cpu_temperature
+description: Current kernel version
+unit: "°C"
+device_class: temperature
+state_class: measurement
+script: "cat /sys/class/thermal/thermal_zone0/temp | awk 'END {print $1/1000}'"
