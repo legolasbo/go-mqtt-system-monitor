@@ -250,7 +250,7 @@ func availableMemory() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%.1f", float64(val.Available)/float64(BytesInGigaByte)), nil
+	return fmt.Sprintf("%.1f", float64(val.Available)/BytesInGigaByte), nil
 }
 
 func occupiedMemory() (string, error) {
@@ -259,7 +259,7 @@ func occupiedMemory() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%.1f", float64(val.Used)/float64(BytesInGigaByte)), nil
+	return fmt.Sprintf("%.1f", float64(val.Used)/BytesInGigaByte), nil
 }
 
 func memoryUsage() (string, error) {
@@ -277,7 +277,7 @@ func totalMemory() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%d", val.Total/BytesInGigaByte), nil
+	return fmt.Sprintf("%.1f", float64(val.Total)/BytesInGigaByte), nil
 }
 
 func listAllSensors(logger Logger) {
