@@ -4,7 +4,7 @@ const DefaultExpireAfter = 60
 
 type HomeAssistantConfig struct {
 	Name              string              `json:"name,omitempty"`
-	Class             string              `json:"class,omitempty"`
+	DeviceClass       string              `json:"device_class,omitempty"`
 	UnitOfMeasurement string              `json:"unit_of_measurement,omitempty"`
 	Device            HomeAssistantDevice `json:"device"`
 	ExpireAfter       int                 `json:"expire_after,omitempty"`
@@ -23,7 +23,7 @@ type HomeAssistantDevice struct {
 func GetHomeAssistantConfig(daemon Daemon) HomeAssistantConfig {
 	return HomeAssistantConfig{
 		Name:              daemon.Config.ClientId,
-		Class:             "connectivity",
+		DeviceClass:       "connectivity",
 		UnitOfMeasurement: "None",
 		Device: HomeAssistantDevice{
 			Name:        daemon.Config.ClientId,

@@ -33,7 +33,7 @@ func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig)
 	topic := fmt.Sprintf("homeassistant/sensor/%s/config", uniqueId)
 	return topic, HomeAssistantConfig{
 		Name:              s.Name,
-		Class:             s.DeviceClass,
+		DeviceClass:       s.DeviceClass,
 		UnitOfMeasurement: s.Unit,
 		Device: HomeAssistantDevice{
 			Name:        fmt.Sprintf("%s %s", config.ClientId, s.Name),
