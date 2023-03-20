@@ -17,7 +17,7 @@ const BytesInGigaByte = 1073741824
 
 type BuiltinSensor func() (string, error)
 type Sensor struct {
-	Class       string `yaml:"class"`
+	DeviceClass string `yaml:"class"`
 	Description string `yaml:"description"`
 	Id          string `yaml:"id"`
 	Name        string `yaml:"name"`
@@ -25,6 +25,7 @@ type Sensor struct {
 	Builtin     BuiltinSensor
 	Value       string
 	Unit        string `yaml:"unit"`
+	StateCass   string `yaml:"state_cass"`
 }
 
 func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig) {
@@ -32,7 +33,7 @@ func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig)
 	topic := fmt.Sprintf("homeassistant/sensor/%s/config", uniqueId)
 	return topic, HomeAssistantConfig{
 		Name:              s.Name,
-		Class:             s.Class,
+		Class:             s.DeviceClass,
 		UnitOfMeasurement: s.Unit,
 		Device: HomeAssistantDevice{
 			Name:        fmt.Sprintf("%s %s", config.ClientId, s.Name),
@@ -40,9 +41,10 @@ func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig)
 			Identifiers: config.ClientId,
 		},
 		ExpireAfter: DefaultExpireAfter,
-		StateTopic:  fmt.Sprintf("%s/%s/%s/%s", config.Prefix, config.ClientId, s.Class, s.Id),
+		StateTopic:  fmt.Sprintf("%s/%s/%s/%s", config.Prefix, config.ClientId, s.DeviceClass, s.Id),
 		UniqueId:    uniqueId,
 		ObjectId:    uniqueId,
+		StateClass:  s.StateCass,
 	}
 }
 
@@ -116,7 +118,7 @@ func builtinSensors() map[string]Sensor {
 	sensors := make(map[string]Sensor)
 
 	sensors["cpu_cores"] = Sensor{
-		Class:       "None",
+		DeviceClass: "None",
 		Unit:        "",
 		Id:          "cpu_cores",
 		Name:        "CPU Cores",
@@ -124,15 +126,16 @@ func builtinSensors() map[string]Sensor {
 		Description: "Number of available cpu cores",
 	}
 	sensors["cpu_load"] = Sensor{
-		Class:       "None",
+		DeviceClass: "None",
 		Unit:        "%",
 		Id:          "cpu_load",
 		Name:        "CPU Load",
 		Builtin:     cpuPercentage,
 		Description: "CPU Load averaged over all CPU cores in percent",
+		StateCass:   "measurement",
 	}
 	sensors["net_rx_usage"] = Sensor{
-		Class:       "data_size",
+		DeviceClass: "data_size",
 		Unit:        "GiB",
 		Id:          "net_rx_usage",
 		Name:        "Network RX usage",
@@ -140,7 +143,7 @@ func builtinSensors() map[string]Sensor {
 		Description: "Total data received over the network in GiB",
 	}
 	sensors["net_tx_usage"] = Sensor{
-		Class:       "data_size",
+		DeviceClass: "data_size",
 		Unit:        "GiB",
 		Id:          "net_tx_usage",
 		Name:        "Network TX usage",
@@ -148,15 +151,16 @@ func builtinSensors() map[string]Sensor {
 		Description: "Total data sent over the network in GiB",
 	}
 	sensors["root_fs_usage"] = Sensor{
-		Class:       "None",
+		DeviceClass: "None",
 		Unit:        "%",
 		Id:          "root_fs_usage",
 		Name:        "Root FS usage",
 		Builtin:     rootFSUsage,
 		Description: "Root filesystem usage in percent",
+		StateCass:   "measurement",
 	}
 	sensors["available_memory"] = Sensor{
-		Class:       "data_size",
+		DeviceClass: "data_size",
 		Unit:        "GB",
 		Id:          "available_memory",
 		Name:        "Available Memory",
@@ -164,7 +168,7 @@ func builtinSensors() map[string]Sensor {
 		Description: "Available memory in GB",
 	}
 	sensors["occupied_memory"] = Sensor{
-		Class:       "data_size",
+		DeviceClass: "data_size",
 		Unit:        "GB",
 		Id:          "occupied_memory",
 		Name:        "Occupied Memory",
@@ -172,7 +176,7 @@ func builtinSensors() map[string]Sensor {
 		Description: "Occupied memory in GB",
 	}
 	sensors["total_memory"] = Sensor{
-		Class:       "data_size",
+		DeviceClass: "data_size",
 		Unit:        "GB",
 		Id:          "total_memory",
 		Name:        "Total Memory",
@@ -180,12 +184,13 @@ func builtinSensors() map[string]Sensor {
 		Description: "Total memory in GB",
 	}
 	sensors["memory_usage"] = Sensor{
-		Class:       "None",
+		DeviceClass: "None",
 		Unit:        "%",
 		Id:          "memory_usage",
 		Name:        "Memory usage",
 		Builtin:     memoryUsage,
 		Description: "Memory usage in percent",
+		StateCass:   "measurement",
 	}
 
 	return sensors

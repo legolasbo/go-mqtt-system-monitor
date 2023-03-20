@@ -75,7 +75,7 @@ func (d *Daemon) readSensors() {
 			d.Logger.Error(err.Error())
 			continue
 		}
-		d.publish(fmt.Sprintf("%s/%s/%s/%s", d.Config.Prefix, d.Config.ClientId, value.Class, value.Id), value.Value)
+		d.publish(fmt.Sprintf("%s/%s/%s/%s", d.Config.Prefix, d.Config.ClientId, value.DeviceClass, value.Id), value.Value)
 	}
 }
 
