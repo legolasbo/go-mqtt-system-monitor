@@ -82,6 +82,8 @@ func LoadSensors(logger Logger) map[string]Sensor {
 	names = append(names, findYamlFiles(fmt.Sprintf("default/sensors/%s", runtime.GOOS))...)
 	names = append(names, findYamlFiles("/etc/msm/sensors")...)
 
+	logger.Debug(fmt.Sprintf("Loading yaml files from: %s\n", strings.Join(names, "\n")))
+
 	for _, name := range names {
 		b, err := os.ReadFile(name)
 		if err != nil {

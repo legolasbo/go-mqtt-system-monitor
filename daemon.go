@@ -109,6 +109,8 @@ func (d *Daemon) filterSensors() {
 		return
 	}
 
+	d.Logger.Debug(fmt.Sprintf("Limiting sensors to: %v", d.sensors))
+
 	filtered := make(map[string]Sensor)
 	for _, name := range d.Config.Sensors {
 		s, ok := d.sensors[name]
