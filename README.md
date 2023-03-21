@@ -15,7 +15,8 @@ To manually install msm, the systemd service, the default sensors and the defaul
 ```console
 sudo cp msm /usr/bin/msm
 sudo cp systemd/msm.service /usr/lib/systemd/system/
-sudo cp -r default /etc/msm
+sudo cp default/config.yml /etc/msm/config.yml
+sudo cp -r default/sensors/[PLATFORM] /etc/msm/sensors
 
 sudo systemctl enable msm
 sudo systemctl start msm
@@ -24,6 +25,10 @@ sudo systemctl start msm
 ## Configuration
 
 The configuration is stored in `/etc/msm/config.yml` by default, but it is possible to use another path passing it as the first argument of the executable.
+You can also provide configuration through command line flags.
+
+- `--list` prints all available sensors and exits the application
+- `--sensors=cpu_load_1m,cpu_load_5m` limits the sensors to only `cpu_load_1m` and `cpu_load_5m`
 
 A default `config.yml` is provided in `default/config.yml`.
 
@@ -35,17 +40,18 @@ Other options are described in the default `config.yml`.
 
 It is possible to add new sensors by adding a yaml file to `/etc/msm/sensors` like `kernel_version.yml` that is provided as a default sensor.
 ```yaml
-name: # The human-readable name
-id: # Machine name
+name: # (REQUIRED) The human-readable name
+id: # (REQUIRED) Machine name
 description: # Description to be displayed when msm is run with the --list flag 
-unit: # Unit of measure
-class: # Home assistant sensor device class. See: https://www.home-assistant.io/integrations/sensor/#device-class
-script: # Valid shell script that leads to a single value.
+unit: # Unit of measure. See: https://developers.home-assistant.io/docs/core/entity/sensor/#available-device-classes
+device_class: # Must be a valid home assistant sensor device class when present. See: https://www.home-assistant.io/integrations/sensor/#device-class
+state_class: # Must be a valid home assistant sensor state class when present. See: https://developers.home-assistant.io/docs/core/entity/sensor/#available-state-classes
+script: # (REQUIRED) Valid shell script that leads to a single value.
 ```
 
 For any given sensor the value will be published on the topic:
 
-`[prefix]/[client_id]/[sensor.class]/[sensor.id]`
+`[prefix]/[client_id]/[sensor.device_class]/[sensor.id]`
 
 `prefix` is read from the config, the default value is `mqtt-system-monitor`
 
@@ -53,7 +59,7 @@ For any given sensor the value will be published on the topic:
 
 If the `homeassistant` flag in the config is set to true, a JSON Home Assistant config for this sensor will be periodically published on the topic:
 
-`homeassistant/[sensor.class]/[client_id]_[sensor.id]/config`
+`homeassistant/[sensor.device_class]/[client_id]_[sensor.id]/config`
 
 ## State
 
