@@ -194,7 +194,7 @@ func builtinSensors() map[string]Sensor {
 		Builtin:     rootFSUsage,
 		Description: "Root filesystem usage in percent",
 		StateClass:  "measurement",
-		Icon:        "mdi:hardisk",
+		Icon:        "mdi:harddisk",
 	}
 	sensors["available_memory"] = Sensor{
 		DeviceClass: "data_size",
