@@ -12,6 +12,7 @@ type HomeAssistantConfig struct {
 	UniqueId          string              `json:"unique_id,omitempty"`
 	ObjectId          string              `json:"object_id,omitempty"`
 	StateClass        string              `json:"state_class,omitempty"`
+	Icon              string              `json:"icon,omitempty"`
 }
 
 type HomeAssistantDevice struct {

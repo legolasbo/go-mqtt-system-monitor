@@ -27,6 +27,7 @@ type Sensor struct {
 	Value       string
 	Unit        string `yaml:"unit"`
 	StateClass  string `yaml:"state_class"`
+	Icon        string `yaml:"icon"`
 }
 
 func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig) {
@@ -46,6 +47,7 @@ func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig)
 		UniqueId:    uniqueId,
 		ObjectId:    uniqueId,
 		StateClass:  s.StateClass,
+		Icon:        s.Icon,
 	}
 }
 
@@ -91,6 +93,9 @@ func LoadSensors(logger Logger) map[string]Sensor {
 		}
 
 		sensors[s.Id] = s
+		if s.Icon == "" && strings.HasPrefix(s.Id, "cpu_") {
+			s.Icon = cpuIcon()
+		}
 	}
 
 	return sensors
@@ -125,6 +130,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "CPU Cores",
 		Builtin:     cpuCores,
 		Description: "Number of available cpu cores",
+		Icon:        "mdi:numeric",
 	}
 	sensors["cpu_usage"] = Sensor{
 		Unit:        "%",
@@ -133,6 +139,7 @@ func builtinSensors() map[string]Sensor {
 		Builtin:     cpuPercentage,
 		Description: "CPU Usage averaged over all CPU cores in percent",
 		StateClass:  "measurement",
+		Icon:        cpuIcon(),
 	}
 	sensors["net_rx_usage"] = Sensor{
 		DeviceClass: "data_size",
@@ -141,6 +148,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "Network RX usage",
 		Builtin:     netRxUsage,
 		Description: "Total data received over the network in GiB",
+		Icon:        "mdi:download-network-outline",
 	}
 	sensors["net_tx_usage"] = Sensor{
 		DeviceClass: "data_size",
@@ -149,6 +157,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "Network TX usage",
 		Builtin:     netTxUsage,
 		Description: "Total data sent over the network in GiB",
+		Icon:        "mdi:upload-network-outline",
 	}
 	sensors["root_fs_usage"] = Sensor{
 		Unit:        "%",
@@ -157,6 +166,7 @@ func builtinSensors() map[string]Sensor {
 		Builtin:     rootFSUsage,
 		Description: "Root filesystem usage in percent",
 		StateClass:  "measurement",
+		Icon:        "mdi:hardisk",
 	}
 	sensors["available_memory"] = Sensor{
 		DeviceClass: "data_size",
@@ -165,6 +175,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "Available Memory",
 		Builtin:     availableMemory,
 		Description: "Available memory in GB",
+		Icon:        "mdi:memory",
 	}
 	sensors["occupied_memory"] = Sensor{
 		DeviceClass: "data_size",
@@ -173,6 +184,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "Occupied Memory",
 		Builtin:     occupiedMemory,
 		Description: "Occupied memory in GB",
+		Icon:        "mdi:memory",
 	}
 	sensors["total_memory"] = Sensor{
 		DeviceClass: "data_size",
@@ -181,6 +193,7 @@ func builtinSensors() map[string]Sensor {
 		Name:        "Total Memory",
 		Builtin:     totalMemory,
 		Description: "Total memory in GB",
+		Icon:        "mdi:memory",
 	}
 	sensors["memory_usage"] = Sensor{
 		Unit:        "%",
@@ -189,9 +202,24 @@ func builtinSensors() map[string]Sensor {
 		Builtin:     memoryUsage,
 		Description: "Memory usage in percent",
 		StateClass:  "measurement",
+		Icon:        "mdi:memory",
 	}
 
 	return sensors
+}
+
+func cpuIcon() string {
+	return fmt.Sprintf("mdi:cpu-%d-bit", wordSize())
+}
+
+func wordSize() int {
+	b64Archs := []string{"amd64", "arm64", "arm64be", "loong64", "mips64", "mips64le", "ppc64", "ppc64le", "riscv64", "s390x", "sparc64", "wasm"}
+	for _, arch := range b64Archs {
+		if runtime.GOARCH == arch {
+			return 64
+		}
+	}
+	return 32
 }
 
 func rootFSUsage() (string, error) {
