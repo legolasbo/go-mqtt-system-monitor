@@ -126,12 +126,12 @@ func builtinSensors() map[string]Sensor {
 		Builtin:     cpuCores,
 		Description: "Number of available cpu cores",
 	}
-	sensors["cpu_load"] = Sensor{
+	sensors["cpu_usage"] = Sensor{
 		Unit:        "%",
-		Id:          "cpu_load",
-		Name:        "CPU Load",
+		Id:          "cpu_usage",
+		Name:        "CPU Usage",
 		Builtin:     cpuPercentage,
-		Description: "CPU Load averaged over all CPU cores in percent",
+		Description: "CPU Usage averaged over all CPU cores in percent",
 		StateClass:  "measurement",
 	}
 	sensors["net_rx_usage"] = Sensor{

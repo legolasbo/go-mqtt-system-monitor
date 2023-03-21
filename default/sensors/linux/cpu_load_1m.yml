@@ -1,0 +1,5 @@
+name: CPU Load 1m
+id: cpu_load_1m
+description: Load average - 1 minute
+state_class: measurement
+script: "cat /proc/loadavg | cut -d" " -f1"
