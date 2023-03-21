@@ -2,4 +2,4 @@ name: CPU Load 5m
 id: cpu_load_5m
 description: Load average - 5 minutes
 state_class: measurement
-script: "cat /proc/loadavg | cut -d" " -f2"
+script: 'cat /proc/loadavg | cut -d" " -f2'
