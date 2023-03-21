@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"os"
 	"os/exec"
+	"runtime"
 	"sort"
 	"strings"
 )
@@ -71,8 +72,9 @@ func (s Sensor) Execute() (Sensor, error) {
 func LoadSensors(logger Logger) map[string]Sensor {
 	sensors := builtinSensors()
 
-	names := findYamlFils("default/sensors")
-	names = append(names, findYamlFils("/etc/msm/sensors")...)
+	names := findYamlFiles("default/sensors")
+	names = append(names, findYamlFiles(fmt.Sprintf("default/sensors/%s", runtime.GOOS))...)
+	names = append(names, findYamlFiles("/etc/msm/sensors")...)
 
 	for _, name := range names {
 		b, err := os.ReadFile(name)
@@ -94,7 +96,7 @@ func LoadSensors(logger Logger) map[string]Sensor {
 	return sensors
 }
 
-func findYamlFils(path string) []string {
+func findYamlFiles(path string) []string {
 	dir, err := os.ReadDir(path)
 	if err != nil {
 		return nil

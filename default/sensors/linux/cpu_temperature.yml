@@ -1,6 +1,6 @@
 name: CPU Temperature
 id: cpu_temperature
-description: Current kernel version
+description: Current CPU Temperature
 unit: "°C"
 device_class: temperature
 state_class: measurement
