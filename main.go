@@ -21,8 +21,8 @@ func main() {
 	config := loadConfig(configPath)
 	logger := createLogger(config)
 
-	enabledSensors := strings.Split(*sensors, ",")
-	if len(enabledSensors) > 0 {
+	if len(*sensors) > 0 {
+		enabledSensors := strings.Split(*sensors, ",")
 		config.Sensors = enabledSensors
 	}
 
