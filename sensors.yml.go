@@ -12,9 +12,13 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"time"
 )
 
-const BytesInGigaByte = 1073741824
+const BitsInByte = 8
+const BytesInKiloByte = 1000
+const BytesInMegaByte = 1000 * BytesInKiloByte
+const BytesInGigaByte = 100 * BytesInMegaByte
 
 type BuiltinSensor func() (string, error)
 type Sensor struct {
@@ -143,20 +147,42 @@ func builtinSensors() map[string]Sensor {
 	}
 	sensors["net_rx_usage"] = Sensor{
 		DeviceClass: "data_size",
-		Unit:        "GiB",
+		Unit:        "GB",
 		Id:          "net_rx_usage",
 		Name:        "Network RX usage",
 		Builtin:     netRxUsage,
-		Description: "Total data received over the network in GiB",
+		Description: "Total data received over the network in GB",
 		Icon:        "mdi:download-network-outline",
 	}
 	sensors["net_tx_usage"] = Sensor{
 		DeviceClass: "data_size",
-		Unit:        "GiB",
+		Unit:        "GB",
 		Id:          "net_tx_usage",
 		Name:        "Network TX usage",
 		Builtin:     netTxUsage,
-		Description: "Total data sent over the network in GiB",
+		Description: "Total data sent over the network in GB",
+		Icon:        "mdi:upload-network-outline",
+	}
+	sensors["net_rx"] = Sensor{
+		DeviceClass: "data_rate",
+		Unit:        "Mbit/s",
+		Id:          "net_rx",
+		Name:        "Network RX",
+		Builtin: func() (string, error) {
+			return fmt.Sprintf("%.3f", float64(netRxBytesLastSec)/BytesInMegaByte*BitsInByte), nil
+		},
+		Description: "Data received over the network in Mbit/s",
+		Icon:        "mdi:download-network-outline",
+	}
+	sensors["net_tx"] = Sensor{
+		DeviceClass: "data_rate",
+		Unit:        "Mbit/s",
+		Id:          "net_tx",
+		Name:        "Network TX",
+		Builtin: func() (string, error) {
+			return fmt.Sprintf("%.3f", float64(netTxBytesLastSec)/BytesInMegaByte*BitsInByte), nil
+		},
+		Description: "Data sent over the network in Mbit/s",
 		Icon:        "mdi:upload-network-outline",
 	}
 	sensors["root_fs_usage"] = Sensor{
@@ -231,13 +257,38 @@ func rootFSUsage() (string, error) {
 	return fmt.Sprintf("%.3f", val.UsedPercent), nil
 }
 
+var netRxBytesLastSec uint64 = 0
+var netTxBytesLastSec uint64 = 0
+
+func senseNetworkSpeed(d *Daemon) {
+	d.Logger.Info("Starting network speed background sensor")
+	val, err := net.IOCounters(false)
+	if err != nil {
+		d.Logger.Error("Failed to start network speed background sensor!")
+		d.Logger.Error(err.Error())
+		return
+	}
+	tx := val[0].BytesSent
+	rx := val[0].BytesRecv
+
+	t := time.NewTicker(time.Second)
+	for range t.C {
+		val, _ = net.IOCounters(false)
+		netTxBytesLastSec = val[0].BytesSent - tx
+		netRxBytesLastSec = val[0].BytesRecv - rx
+
+		tx = val[0].BytesSent
+		rx = val[0].BytesRecv
+	}
+}
+
 func netRxUsage() (string, error) {
 	val, err := net.IOCounters(false)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%d", val[0].BytesRecv/BytesInGigaByte), nil
+	return fmt.Sprintf("%.3f", float64(val[0].BytesRecv)/BytesInGigaByte), nil
 }
 
 func netTxUsage() (string, error) {
@@ -247,7 +298,7 @@ func netTxUsage() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%d", val[0].BytesSent/BytesInGigaByte), nil
+	return fmt.Sprintf("%.3f", float64(val[0].BytesSent)/BytesInGigaByte), nil
 }
 
 func cpuCores() (string, error) {

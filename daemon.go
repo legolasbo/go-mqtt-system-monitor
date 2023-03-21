@@ -20,6 +20,7 @@ type Daemon struct {
 
 func (d *Daemon) Start() {
 	d.Logger.Info("Starting daemon...")
+	d.startBackgroundSensors()
 
 	var err error
 	d.client, err = getMQTTClient(d.Config, d.Logger)
@@ -119,6 +120,14 @@ func (d *Daemon) filterSensors() {
 		filtered[name] = s
 	}
 	d.sensors = filtered
+}
+
+func (d *Daemon) startBackgroundSensors() {
+	_, netRx := d.sensors["net_rx"]
+	_, netTx := d.sensors["net_Tx"]
+	if netRx || netTx {
+		go senseNetworkSpeed(d)
+	}
 }
 
 func createDaemon(config Config, logger Logger) Daemon {
