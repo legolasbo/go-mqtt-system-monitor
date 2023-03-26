@@ -125,10 +125,10 @@ func (d *Daemon) filterSensors() {
 }
 
 func (d *Daemon) startBackgroundSensors() {
-	_, netRx := d.sensors["net_rx"]
-	_, netTx := d.sensors["net_Tx"]
-	if netRx || netTx {
-		go senseNetworkSpeed(d)
+	for _, sensor := range d.sensors {
+		if sensor.StartBgSensor != nil {
+			sensor.StartBgSensor()
+		}
 	}
 }
 

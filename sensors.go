@@ -7,6 +7,7 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/net"
 	"gopkg.in/yaml.v2"
+	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -22,16 +23,17 @@ const BytesInGigaByte = 100 * BytesInMegaByte
 
 type BuiltinSensor func() (string, error)
 type Sensor struct {
-	DeviceClass string `yaml:"device_class"`
-	Description string `yaml:"description"`
-	Id          string `yaml:"id"`
-	Name        string `yaml:"name"`
-	Script      string `yaml:"script"`
-	Builtin     BuiltinSensor
-	Value       string
-	Unit        string `yaml:"unit"`
-	StateClass  string `yaml:"state_class"`
-	Icon        string `yaml:"icon"`
+	DeviceClass   string `yaml:"device_class"`
+	Description   string `yaml:"description"`
+	Id            string `yaml:"id"`
+	Name          string `yaml:"name"`
+	Script        string `yaml:"script"`
+	Builtin       BuiltinSensor
+	StartBgSensor func()
+	Value         string
+	Unit          string `yaml:"unit"`
+	StateClass    string `yaml:"state_class"`
+	Icon          string `yaml:"icon"`
 }
 
 func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig) {
@@ -165,27 +167,27 @@ func builtinSensors() map[string]Sensor {
 		Description: "Total data sent over the network in GB",
 		Icon:        "mdi:upload-network-outline",
 	}
+	rxSens := newNetworkSensor()
 	sensors["net_rx"] = Sensor{
-		DeviceClass: "data_rate",
-		Unit:        "Mbit/s",
-		Id:          "net_rx",
-		Name:        "Network RX",
-		Builtin: func() (string, error) {
-			return fmt.Sprintf("%.3f", float64(netRxBytesLastSec)/BytesInMegaByte*BitsInByte), nil
-		},
-		Description: "Data received over the network in Mbit/s",
-		Icon:        "mdi:download-network-outline",
+		DeviceClass:   "data_rate",
+		Unit:          "Mbit/s",
+		Id:            "net_rx",
+		Name:          "Network RX",
+		Builtin:       func() (string, error) { return rxSens.getStringValue(), nil },
+		StartBgSensor: func() { rxSens.start(RX, time.Second) },
+		Description:   "Data received over the network in Mbit/s",
+		Icon:          "mdi:download-network-outline",
 	}
+	txSens := newNetworkSensor()
 	sensors["net_tx"] = Sensor{
-		DeviceClass: "data_rate",
-		Unit:        "Mbit/s",
-		Id:          "net_tx",
-		Name:        "Network TX",
-		Builtin: func() (string, error) {
-			return fmt.Sprintf("%.3f", float64(netTxBytesLastSec)/BytesInMegaByte*BitsInByte), nil
-		},
-		Description: "Data sent over the network in Mbit/s",
-		Icon:        "mdi:upload-network-outline",
+		DeviceClass:   "data_rate",
+		Unit:          "Mbit/s",
+		Id:            "net_tx",
+		Name:          "Network TX",
+		Builtin:       func() (string, error) { return txSens.getStringValue(), nil },
+		StartBgSensor: func() { txSens.start(TX, time.Second) },
+		Description:   "Data sent over the network in Mbit/s",
+		Icon:          "mdi:upload-network-outline",
 	}
 	sensors["root_fs_usage"] = Sensor{
 		Unit:        "%",
@@ -259,29 +261,65 @@ func rootFSUsage() (string, error) {
 	return fmt.Sprintf("%.3f", val.UsedPercent), nil
 }
 
-var netRxBytesLastSec uint64 = 0
-var netTxBytesLastSec uint64 = 0
+type NetworkTrafficType string
 
-func senseNetworkSpeed(d *Daemon) {
-	d.Logger.Info("Starting network speed background sensor")
+const RX NetworkTrafficType = "RX"
+const TX NetworkTrafficType = "TX"
+
+type NetworkSensor struct {
+	requestValue chan bool
+	value        chan uint64
+}
+
+func newNetworkSensor() NetworkSensor {
+	return NetworkSensor{
+		requestValue: make(chan bool),
+		value:        make(chan uint64),
+	}
+}
+
+func (s *NetworkSensor) getValue() uint64 {
+	s.requestValue <- true
+	return <-s.value
+}
+
+func (s *NetworkSensor) getStringValue() string {
+	return fmt.Sprintf("%.3f", float64(s.getValue())/BytesInMegaByte*BitsInByte)
+}
+
+func (s *NetworkSensor) start(ntt NetworkTrafficType, updateInterval time.Duration) {
 	val, err := net.IOCounters(false)
 	if err != nil {
-		d.Logger.Error("Failed to start network speed background sensor!")
-		d.Logger.Error(err.Error())
-		return
+		log.Fatalln(err)
 	}
-	tx := val[0].BytesSent
-	rx := val[0].BytesRecv
 
-	t := time.NewTicker(time.Second)
-	for range t.C {
-		val, _ = net.IOCounters(false)
-		netTxBytesLastSec = val[0].BytesSent - tx
-		netRxBytesLastSec = val[0].BytesRecv - rx
-
-		tx = val[0].BytesSent
-		rx = val[0].BytesRecv
+	prev := val[0].BytesRecv
+	if ntt == TX {
+		prev = val[0].BytesSent
 	}
+	curr := uint64(0)
+
+	monitor := func(requestValue <-chan bool, value chan<- uint64) {
+		t := time.NewTicker(updateInterval)
+		for {
+			select {
+			case <-t.C:
+				val, _ = net.IOCounters(false)
+
+				now := val[0].BytesRecv
+				if ntt == TX {
+					now = val[0].BytesSent
+				}
+
+				curr = now - prev
+				prev = now
+			case <-requestValue:
+				value <- curr
+			}
+		}
+	}
+
+	go monitor(s.requestValue, s.value)
 }
 
 func netRxUsage() (string, error) {

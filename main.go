@@ -9,6 +9,7 @@ import (
 const DEFAULT_CONFIG_PATH = "/etc/msm/config.yml"
 
 func main() {
+
 	list := flag.Bool("list", false, "List all known sensors")
 	sensors := flag.String("sensors", "", "Comma separated list of sensors to enable")
 	flag.Parse()
