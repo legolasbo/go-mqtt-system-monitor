@@ -52,6 +52,10 @@ func (d *Daemon) Start() {
 }
 
 func (d *Daemon) configureHomeAssistant() {
+	if !d.Config.HomeAssistant {
+		return
+	}
+
 	topic := fmt.Sprintf("homeassistant/binary_sensor/%s/config", d.Config.ClientId)
 	d.publishHomeAssistantConfig(topic, GetHomeAssistantConfig(*d))
 
