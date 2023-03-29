@@ -2,12 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
-	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/shirou/gopsutil/v3/net"
 	"gopkg.in/yaml.v2"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -15,11 +11,6 @@ import (
 	"strings"
 	"time"
 )
-
-const BitsInByte = 8
-const BytesInKiloByte = 1000
-const BytesInMegaByte = 1000 * BytesInKiloByte
-const BytesInGigaByte = 100 * BytesInMegaByte
 
 type BuiltinSensor func() (string, error)
 type Sensor struct {
@@ -238,20 +229,6 @@ func builtinSensors() map[string]Sensor {
 	return sensors
 }
 
-func cpuIcon() string {
-	return fmt.Sprintf("mdi:cpu-%d-bit", wordSize())
-}
-
-func wordSize() int {
-	b64Archs := []string{"amd64", "arm64", "arm64be", "loong64", "mips64", "mips64le", "ppc64", "ppc64le", "riscv64", "s390x", "sparc64", "wasm"}
-	for _, arch := range b64Archs {
-		if runtime.GOARCH == arch {
-			return 64
-		}
-	}
-	return 32
-}
-
 func rootFSUsage() (string, error) {
 	val, err := disk.Usage("/")
 	if err != nil {
@@ -259,145 +236,6 @@ func rootFSUsage() (string, error) {
 	}
 
 	return fmt.Sprintf("%.3f", val.UsedPercent), nil
-}
-
-type NetworkTrafficType string
-
-const RX NetworkTrafficType = "RX"
-const TX NetworkTrafficType = "TX"
-
-type NetworkSensor struct {
-	requestValue chan bool
-	value        chan uint64
-}
-
-func newNetworkSensor() NetworkSensor {
-	return NetworkSensor{
-		requestValue: make(chan bool),
-		value:        make(chan uint64),
-	}
-}
-
-func (s *NetworkSensor) getValue() uint64 {
-	s.requestValue <- true
-	return <-s.value
-}
-
-func (s *NetworkSensor) getStringValue() string {
-	return fmt.Sprintf("%.3f", float64(s.getValue())/BytesInMegaByte*BitsInByte)
-}
-
-func (s *NetworkSensor) start(ntt NetworkTrafficType, updateInterval time.Duration) {
-	val, err := net.IOCounters(false)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	prev := val[0].BytesRecv
-	if ntt == TX {
-		prev = val[0].BytesSent
-	}
-	curr := uint64(0)
-
-	monitor := func(requestValue <-chan bool, value chan<- uint64) {
-		t := time.NewTicker(updateInterval)
-		for {
-			select {
-			case <-t.C:
-				val, _ = net.IOCounters(false)
-
-				now := val[0].BytesRecv
-				if ntt == TX {
-					now = val[0].BytesSent
-				}
-
-				curr = now - prev
-				if int64(now)-int64(prev) > 0 {
-					curr = 0
-				}
-				prev = now
-			case <-requestValue:
-				value <- curr
-			}
-		}
-	}
-
-	go monitor(s.requestValue, s.value)
-}
-
-func netRxUsage() (string, error) {
-	val, err := net.IOCounters(false)
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%.3f", float64(val[0].BytesRecv)/BytesInGigaByte), nil
-}
-
-func netTxUsage() (string, error) {
-	val, err := net.IOCounters(false)
-
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%.3f", float64(val[0].BytesSent)/BytesInGigaByte), nil
-}
-
-func cpuCores() (string, error) {
-	val, err := cpu.Info()
-	if err != nil {
-		return "", err
-	}
-	cores := 0
-	for _, stat := range val {
-		cores += int(stat.Cores)
-	}
-	return fmt.Sprintf("%d", cores), nil
-}
-
-func cpuPercentage() (string, error) {
-	val, err := cpu.Percent(0, false)
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%.3f", val[0]), nil
-}
-
-func availableMemory() (string, error) {
-	val, err := mem.VirtualMemory()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%.1f", float64(val.Available)/BytesInGigaByte), nil
-}
-
-func occupiedMemory() (string, error) {
-	val, err := mem.VirtualMemory()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%.1f", float64(val.Used)/BytesInGigaByte), nil
-}
-
-func memoryUsage() (string, error) {
-	val, err := mem.VirtualMemory()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%.3f", val.UsedPercent), nil
-}
-
-func totalMemory() (string, error) {
-	val, err := mem.VirtualMemory()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%.1f", float64(val.Total)/BytesInGigaByte), nil
 }
 
 func listAllSensors(logger Logger) {

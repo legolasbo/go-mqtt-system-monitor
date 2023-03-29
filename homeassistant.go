@@ -1,7 +1,5 @@
 package main
 
-const DefaultExpireAfter = 60
-
 type HomeAssistantConfig struct {
 	Name              string              `json:"name,omitempty"`
 	DeviceClass       string              `json:"device_class,omitempty"`
