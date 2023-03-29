@@ -58,7 +58,7 @@ func (s *NetworkSensor) start(ntt NetworkTrafficType, updateInterval time.Durati
 				}
 
 				curr = now - prev
-				if int64(now)-int64(prev) > 0 {
+				if int64(now)-int64(prev) < 0 {
 					curr = 0
 				}
 				prev = now
