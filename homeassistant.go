@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+)
 
 type HomeAssistantConfig struct {
 	Name              string              `json:"name,omitempty"`
@@ -22,8 +25,9 @@ type HomeAssistantDevice struct {
 }
 
 func GetHomeAssistantDevice(conf Config) HomeAssistantDevice {
+	caser := cases.Title(language.Dutch)
 	return HomeAssistantDevice{
-		Name:        strings.ToTitle(conf.ClientId),
+		Name:        caser.String(conf.ClientId),
 		Model:       conf.ClientId,
 		Identifiers: conf.ClientId,
 	}
