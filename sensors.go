@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/v4/disk"
 	"gopkg.in/yaml.v2"
 	"os"
 	"os/exec"
