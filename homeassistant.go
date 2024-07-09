@@ -19,18 +19,22 @@ type HomeAssistantDevice struct {
 	Identifiers string `json:"identifiers,omitempty"`
 }
 
+func GetHomeAssistantDevice(conf Config) HomeAssistantDevice {
+	return HomeAssistantDevice{
+		Name:        conf.ClientId,
+		Model:       conf.ClientId,
+		Identifiers: conf.ClientId,
+	}
+}
+
 func GetHomeAssistantConfig(daemon Daemon) HomeAssistantConfig {
 	return HomeAssistantConfig{
 		Name:              daemon.Config.ClientId,
 		DeviceClass:       "connectivity",
 		UnitOfMeasurement: "None",
-		Device: HomeAssistantDevice{
-			Name:        daemon.Config.ClientId,
-			Model:       daemon.Config.ClientId,
-			Identifiers: daemon.Config.ClientId,
-		},
-		ExpireAfter: DefaultExpireAfter,
-		StateTopic:  daemon.stateTopic(),
-		UniqueId:    daemon.Config.ClientId,
+		Device:            GetHomeAssistantDevice(daemon.Config),
+		ExpireAfter:       DefaultExpireAfter,
+		StateTopic:        daemon.stateTopic(),
+		UniqueId:          daemon.Config.ClientId,
 	}
 }
