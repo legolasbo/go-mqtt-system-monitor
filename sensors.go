@@ -29,7 +29,7 @@ type Sensor struct {
 
 func (s Sensor) HomeAssistantConfig(config Config) (string, HomeAssistantConfig) {
 	uniqueId := fmt.Sprintf("%s_%s", config.ClientId, s.Id)
-	topic := fmt.Sprintf("homeassistant/sensor/%s/config", uniqueId)
+	topic := fmt.Sprintf("homeassistant/sensor/%s/%s/config", config.ClientId, s.Id)
 	return topic, HomeAssistantConfig{
 		Name:              s.Name,
 		DeviceClass:       s.DeviceClass,

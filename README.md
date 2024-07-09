@@ -59,7 +59,7 @@ For any given sensor the value will be published on the topic:
 
 If the `homeassistant` flag in the config is set to true, a JSON Home Assistant config for this sensor will be periodically published on the topic:
 
-`homeassistant/[sensor.device_class]/[client_id]_[sensor.id]/config`
+`homeassistant/[sensor.device_class]/[client_id]/[sensor.id]/config`
 
 ## State
 
