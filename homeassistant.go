@@ -1,5 +1,7 @@
 package main
 
+import "strings"
+
 type HomeAssistantConfig struct {
 	Name              string              `json:"name,omitempty"`
 	DeviceClass       string              `json:"device_class,omitempty"`
@@ -21,7 +23,7 @@ type HomeAssistantDevice struct {
 
 func GetHomeAssistantDevice(conf Config) HomeAssistantDevice {
 	return HomeAssistantDevice{
-		Name:        conf.ClientId,
+		Name:        strings.ToTitle(conf.ClientId),
 		Model:       conf.ClientId,
 		Identifiers: conf.ClientId,
 	}
